@@ -21,12 +21,7 @@ import Control.Applicative ((<$>))
 import Control.Monad (when)
 import System.FilePath.Posix (dropExtension, addExtension)
 
-main = do
-  c <- T.getContents
-  c' <- (onBody f . fromRight (Pandoc nullMeta []) . readJSON def) c
-  (T.putStr . writeJSON def) c'
-
-transform :: Pandoc -> IO Pandoc
+transform :: Pandoc -> IO ()
 transform = onBody f
 
 onBody :: ([Block] -> IO [Block]) -> Pandoc -> IO Pandoc

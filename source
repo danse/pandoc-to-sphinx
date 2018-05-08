@@ -30,28 +30,20 @@
 
 
 
-licenza per una pubblicazione più graduale
 
-o ci sono le funzioni di alto livello esportate in Text.Pandoc.App
-collegando Text.Pandoc.Readers.getReader con il parsing di opzioni
-o si specifica il writer manualmente
 
-https://github.com/Hogeyama/pandoc-wrapper/blob/master/Main.hs
+we want to put the result in a directory argument
 
-in Main i can put together a minimal wrapper
+https://hackage.haskell.org/package/optparse-applicative-0.14.2.0/docs/Options-Applicative-Builder.html#v:str
+not sure about how to specify an optional option
+
+accepting json input
 
 if there is anything from `convert.hs`, i can add it eventually
 what happens when pandoc reads an RST which refers to media?
 
 i can add new options after we fix the problem with table wraps in docs2rst
 
-un wrapper sarebbe semplicemente un client per la libreria
-non mi sembra che ci sia supporto specifico per i wrapper
-
-otherwise accepting json input
-maybe we can do it with a pandoc wrapper like the existing ones
-it requires a way to pass command line options through
-accepting any pandoc-document as an input is more convenient for the users
 
 
 
