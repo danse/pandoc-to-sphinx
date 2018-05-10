@@ -21,29 +21,32 @@ import Control.Applicative ((<$>))
 import Control.Monad (when)
 import System.FilePath.Posix (dropExtension, addExtension)
 
-transform :: Pandoc -> IO ()
-transform = onBody f
+transform :: Str -> Maybe Int -> Pandoc -> IO Pandoc
+transform dir level = onBody (f dir level)
 
 onBody :: ([Block] -> IO [Block]) -> Pandoc -> IO Pandoc
 onBody f (Pandoc m b) = do
   b' <- f b
   pure (Pandoc m b')
 
-f :: [Block] -> IO [Block]
-f d = do
+
+
+f :: Str -> Maybe Int -> [Block] -> IO [Block]
+f dir Nothing body = f dir (Just $ autoLevel body) body
+f dir (Just level) body = do
   exists <- doesPathExist "index"  
   when exists (removeDirectoryRecursive "index")
   createDirectory "index"  
-  s <- writeSections d
-  pure (makeIndex s d)
+  s <- writeSections level body
+  pure (makeIndex level s body)
 
-makeIndex :: [String] -> [Block] -> [Block]
-makeIndex s b = getIntro b <> [tableOfContents]
+makeIndex :: Int -> [String] -> [Block] -> [Block]
+makeIndex l s b = getIntro b <> [tableOfContents]
   where tableOfContents = tocTree 2 s
-        getIntro = join . fst . breakSections
+        getIntro = join . fst . breakSections l
 
-writeSections :: [Block] -> IO [String]
-writeSections = sequence . map writeSection . snd . breakSections
+writeSections :: Int -> [Block] -> IO [String]
+writeSections l = sequence . map writeSection . snd . breakSections l
 
 writeSection :: [Block] -> IO String
 writeSection [] = pure "empty-section"
@@ -72,10 +75,10 @@ untilM p f i = do
   r <- p i
   if r then pure i else untilM p f (f i)
 
-breakSections body = (intro, sections)
+breakSections lev body = (intro, sections)
   where intro = take 1 broken
         sections = drop 1 broken
-        broken = multiBreak (isHeading (level body)) body
+        broken = multiBreak (isHeading (lev body)) body
 
 rstOptions = def { writerWrapText = WrapNone }
 
@@ -92,8 +95,8 @@ maybeHead l
   | otherwise = Just (head l)
 
 -- | if we have only one header 1 break by header 2 and so on
-level :: [Block] -> Int
-level body = headDefault 1 $ filter hasSeveral [2, 3, 4, 5, 1]
+autoLevel :: [Block] -> Int
+autoLevel body = headDefault 1 $ filter hasSeveral [2, 3, 4, 5, 1]
   where hasSeveral l = (length $ query (collectHeading l) body) > 1
         collectHeading l i = if isHeading l i then [i] else []
 
@@ -128,9 +131,9 @@ tocTree depth paths = RawBlock "rst" $
 
 -- | get the path corresponding to some heading
 -- >>> getPath (Header 2 ("", [], []) [Str "my section accénted"])
--- "index/my-section-accénted.rst"
+-- "my-section-accénted.rst"
 getPath :: Block -> String
-getPath (Header _  _ i) = "index/" <> adapt (foldl j "" $ walk simplify' i) <> ".rst"
+getPath (Header _  _ i) = adapt (foldl j "" $ walk simplify' i) <> ".rst"
   where j s1 (Str s2) = s1 <> s2
         j s1 _ = s1 <> "unknown-inline"
         adapt = map replace . limit -- adapt for the file system

@@ -18,21 +18,24 @@ import Options.Applicative
 import Control.Monad (when, unless)
 
 
-interact' :: (Pandoc -> IO a) -> IO a
-interact' f = T.getContents >>= handleError . readJSON def >>= f
-
 data Options = Options {
+  dir :: Str,
   levelOption :: Maybe Int
   }
 
 toSphinx :: Options -> IO ()
-toSphinx (Options levelOption) = interact' transform
+toSphinx (Options dir level) = T.getContents >>=
+                handleError . readJSON def >>=
+                transform dir level >>
+                pure ()
 
 options :: Parser Options
 options = Options
-          <$> option auto (long "level"
-                           <> short 'l'
-                           <> help "the section level to use for splitting the document"
-                           <> showDefault)
+          <$> argument str (metavar "OUTPUT_DIR" <>
+                            help "the directory where to save the Sphinx files")
+          <*> option auto (long "level" <>
+                           short 'l' <>
+                           help "the section level to use for splitting the document" <>
+                           showDefault)
 
 main = execParser (info options fullDesc) >>= toSphinx

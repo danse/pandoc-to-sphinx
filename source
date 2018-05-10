@@ -32,6 +32,32 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+now we want everything to go into a customisable folder
+it was based on the hardcoded parent
+so the current logic is broken
+i removed the "index/" prefix from getPath
+
+moving to a command is a good idea regardless of the error with dependencies
+the logic is not trivial
+
+maybe with an option to copy the media folder
+keeping the files if it exists?
+creating it if it doesn't exist
 we want to put the result in a directory argument
 
 https://hackage.haskell.org/package/optparse-applicative-0.14.2.0/docs/Options-Applicative-Builder.html#v:str
