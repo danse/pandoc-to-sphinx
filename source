@@ -68,7 +68,7 @@ accepting json input
 if there is anything from `convert.hs`, i can add it eventually
 what happens when pandoc reads an RST which refers to media?
 
-i can add new options after we fix the problem with table wraps in docs2rst
+i can add new options after the extraction
 
 
 
